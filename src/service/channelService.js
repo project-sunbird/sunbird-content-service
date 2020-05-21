@@ -67,94 +67,6 @@ function getChannelValuesById (req, response) {
   ])
 }
 
-function ChannelList (req, response) {
-  logger.debug({ msg: 'channelService.ChannelList() called' }, req)
-  var rspObj = req.rspObj
-  var data = req.body
-  if (!data) {
-    rspObj.responseCode = responseCode.CLIENT_ERROR
-    logger.error({
-      msg: 'Error due to required request body is missing',
-      additionalInfo: { data },
-      err: { responseCode: rspObj.responseCode }
-    }, req)
-    return response.status(400).send(respUtil.errorResponse(rspObj))
-  }
-
-  var ekStepReqData = {
-    request: data.request
-  }
-
-  async.waterfall([
-
-    function (CBW) {
-      logger.debug({ msg: 'Request to get channel List' }, req)
-      ekStepUtil.ChannelList(ekStepReqData, req.headers, function (err, res) {
-        if (err || res.responseCode !== responseCode.SUCCESS) {
-          rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
-          logger.error({ msg: 'Getting error from ekstep while fetching channel List', additionalInfo: { ekStepReqData }, err: { err, responseCode: rspObj.responseCode } }, req)
-          var httpStatus = res && res.statusCode >= 100 && res.statusCode < 600 ? res.statusCode : 500
-          rspObj.result = res && res.result ? res.result : {}
-          rspObj = utilsService.getErrorResponse(rspObj, res)
-          return response.status(httpStatus).send(respUtil.errorResponse(rspObj))
-        } else {
-          CBW(null, res)
-        }
-      })
-    },
-
-    function (res) {
-      rspObj.result = res.result
-      logger.debug({ msg: 'channel List details', additionalInfo: { result: rspObj.result } }, req)
-      return response.status(200).send(respUtil.successResponse(rspObj))
-    }
-  ])
-}
-
-function ChannelSearch (req, response) {
-  logger.debug({ msg: 'channelService.ChannelSearch() called' }, req)
-  var rspObj = req.rspObj
-  var data = req.body
-  if (!data) {
-    rspObj.responseCode = responseCode.CLIENT_ERROR
-    logger.error({
-      msg: 'Error due to required request body is missing',
-      additionalInfo: { data },
-      err: { responseCode: rspObj.responseCode }
-    }, req)
-    return response.status(400).send(respUtil.errorResponse(rspObj))
-  }
-
-  var ekStepReqData = {
-    request: data.request
-  }
-
-  async.waterfall([
-
-    function (CBW) {
-      logger.debug({ msg: 'Request to search channel', additionalInfo: { ekStepReqData } }, req)
-      ekStepUtil.ChannelSearch(ekStepReqData, req.headers, function (err, res) {
-        if (err || res.responseCode !== responseCode.SUCCESS) {
-          rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
-          logger.error({ msg: 'Getting error from ekstep while searching channel', additionalInfo: { ekStepReqData }, err: { err, responseCode: rspObj.responseCode } }, req)
-          var httpStatus = res && res.statusCode >= 100 && res.statusCode < 600 ? res.statusCode : 500
-          rspObj.result = res && res.result ? res.result : {}
-          rspObj = utilsService.getErrorResponse(rspObj, res)
-          return response.status(httpStatus).send(respUtil.errorResponse(rspObj))
-        } else {
-          CBW(null, res)
-        }
-      })
-    },
-
-    function (res) {
-      rspObj.result = res.result
-      logger.debug({ msg: 'channel search result', additionalInfo: { result: rspObj.result } }, req)
-      return response.status(200).send(respUtil.successResponse(rspObj))
-    }
-  ])
-}
-
 function ChannelCreate (req, response) {
   logger.debug({ msg: 'channelService.ChannelCreate() called' }, req)
   var rspObj = req.rspObj
@@ -249,7 +161,5 @@ function ChannelUpdate (req, response) {
 }
 
 module.exports.getChannelValuesById = getChannelValuesById
-module.exports.ChannelList = ChannelList
 module.exports.ChannelCreate = ChannelCreate
 module.exports.ChannelUpdate = ChannelUpdate
-module.exports.ChannelSearch = ChannelSearch

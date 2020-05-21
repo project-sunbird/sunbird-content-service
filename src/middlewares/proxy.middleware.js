@@ -1,5 +1,6 @@
 var proxy = require('express-http-proxy')
 var contentService = require('../service/contentService')
+var courseService = require('../service/courseService')
 var collaboratorService = require('../service/collaboratorService')
 var dialCodeService = require('../service/dialCodeService')
 var lockService = require('../service/lockService')
@@ -8,6 +9,8 @@ var configUtil = require('sb-config-util')
 
 module.exports = function (app) {
   var contentRepoBaseUrl = configUtil.getConfig('CONTENT_REPO_BASE_URL')
+  var contentServiceBaseUrl = configUtil.getConfig('CONTENT_SERVICE_BASE_URL')
+  var assessmentServiceBaseUrl = configUtil.getConfig('ASSESSMENT_SERVICE_BASE_URL')
   var dialRepoBaseUrl = configUtil.getConfig('DIAL_REPO_BASE_URL')
   var ekstepProxyUrl = globalEkstepProxyBaseUrl
   var contentRepoApiKey = configUtil.getConfig(
@@ -26,6 +29,23 @@ module.exports = function (app) {
   )
   var languageServiceApiKey = configUtil.getConfig(
     'LANGUAGE_SERVICE_AUTHORIZATION_TOKEN'
+  )
+
+  app.use(
+    '/itemset/*',
+    requestMiddleware.validateUserToken,
+    proxy(assessmentServiceBaseUrl, {
+      limit: reqDataLimitOfContentUpload,
+      proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+        proxyReqOpts.headers['Authorization'] = contentRepoApiKey
+        return proxyReqOpts
+      },
+      proxyReqPathResolver: function (req) {
+        var originalUrl = req.originalUrl
+        originalUrl = originalUrl.replace('v1/', 'v3/')
+        return require('url').parse(assessmentServiceBaseUrl + originalUrl).path
+      }
+    })
   )
 
   app.use(
@@ -75,6 +95,39 @@ module.exports = function (app) {
     proxy(ekstepProxyUrl, {
       proxyReqPathResolver: function (req) {
         return require('url').parse(ekstepProxyUrl + req.originalUrl).path
+      }
+    })
+  )
+
+  app.use(
+    '/action/content/v3/create',
+    requestMiddleware.validateUserToken,
+    proxy(contentServiceBaseUrl, {
+      limit: reqDataLimitOfContentUpload,
+      proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+        proxyReqOpts.headers['Authorization'] = contentRepoApiKey
+        return proxyReqOpts
+      },
+      proxyReqPathResolver: function (req) {
+        var originalUrl = req.originalUrl
+        originalUrl = originalUrl.replace('action/', '')
+        return require('url').parse(contentServiceBaseUrl + originalUrl).path
+      }
+    })
+  )
+
+  app.use(['/action/content/v3/hierarchy/add', '/action/content/v3/hierarchy/remove'],
+    requestMiddleware.validateUserToken,
+    proxy(contentServiceBaseUrl, {
+      limit: reqDataLimitOfContentUpload,
+      proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+        proxyReqOpts.headers['Authorization'] = contentRepoApiKey
+        return proxyReqOpts
+      },
+      proxyReqPathResolver: function (req) {
+        var originalUrl = req.originalUrl
+        originalUrl = originalUrl.replace('action/', '')
+        return require('url').parse(contentServiceBaseUrl + originalUrl).path
       }
     })
   )
@@ -146,7 +199,9 @@ module.exports = function (app) {
     .patch(
       requestMiddleware.gzipCompression(),
       requestMiddleware.createAndValidateRequestBody,
-      requestMiddleware.apiAccessForCreatorUser
+      requestMiddleware.validateToken,
+      requestMiddleware.apiAccessForCreatorUser,
+      contentService.updateContentAPI
     )
 
   app
@@ -178,7 +233,9 @@ module.exports = function (app) {
     .patch(
       requestMiddleware.gzipCompression(),
       requestMiddleware.createAndValidateRequestBody,
-      requestMiddleware.hierarchyUpdateApiAccess
+      requestMiddleware.validateToken,
+      requestMiddleware.hierarchyUpdateApiAccess,
+      courseService.updateCourseHierarchyAPI
     )
 
   app
@@ -225,8 +282,7 @@ module.exports = function (app) {
     })
   )
   app.use(
-    ['/action/framework/v3/read/*', '/action/content/v3/read/*', '/action/content/v1/read/*',
-      '/action/content/v3/hierarchy/*'],
+    ['/action/framework/v3/read/*', '/action/content/v3/read/*', '/action/content/v1/read/*'],
     proxy(contentRepoBaseUrl, {
       limit: reqDataLimitOfContentUpload,
       proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
@@ -240,6 +296,125 @@ module.exports = function (app) {
       }
     })
   )
+
+  app.use(
+    ['/action/content/v3/hierarchy/*'],
+    proxy(contentServiceBaseUrl, {
+      limit: reqDataLimitOfContentUpload,
+      proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+        proxyReqOpts.headers['Authorization'] = contentRepoApiKey
+        return proxyReqOpts
+      },
+      proxyReqPathResolver: function (req) {
+        var originalUrl = req.originalUrl
+        originalUrl = originalUrl.replace('action/', '')
+        return require('url').parse(contentServiceBaseUrl + originalUrl).path
+      }
+    })
+  )
+
+  app.use(
+    '/action/content/v3/upload/*',
+    requestMiddleware.validateUserToken,
+    proxy(contentServiceBaseUrl, {
+      limit: reqDataLimitOfContentUpload,
+      proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+        proxyReqOpts.headers['Authorization'] = contentRepoApiKey
+        return proxyReqOpts
+      },
+      proxyReqPathResolver: function (req) {
+        var originalUrl = req.originalUrl
+        originalUrl = originalUrl.replace('action/', '')
+        return require('url').parse(contentServiceBaseUrl + originalUrl).path
+      }
+    })
+  )
+
+  app.use(
+    '/action/content/v3/copy/*',
+    requestMiddleware.validateUserToken,
+    proxy(contentServiceBaseUrl, {
+      limit: reqDataLimitOfContentUpload,
+      proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+        proxyReqOpts.headers['Authorization'] = contentRepoApiKey
+        return proxyReqOpts
+      },
+      proxyReqPathResolver: function (req) {
+        var originalUrl = req.originalUrl
+        originalUrl = originalUrl.replace('action/', '')
+        return require('url').parse(contentServiceBaseUrl + originalUrl).path
+      }
+    })
+  )
+
+  app.use(
+    '/action/content/v3/discard/*',
+    requestMiddleware.validateUserToken,
+    proxy(contentServiceBaseUrl, {
+      limit: reqDataLimitOfContentUpload,
+      proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+        proxyReqOpts.headers['Authorization'] = contentRepoApiKey
+        return proxyReqOpts
+      },
+      proxyReqPathResolver: function (req) {
+        var originalUrl = req.originalUrl
+        originalUrl = originalUrl.replace('action/', '')
+        return require('url').parse(contentServiceBaseUrl + originalUrl).path
+      }
+    })
+  )
+
+  app.use(
+    '/action/content/v3/flag/accept/*',
+    requestMiddleware.validateUserToken,
+    proxy(contentServiceBaseUrl, {
+      limit: reqDataLimitOfContentUpload,
+      proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+        proxyReqOpts.headers['Authorization'] = contentRepoApiKey
+        return proxyReqOpts
+      },
+      proxyReqPathResolver: function (req) {
+        var originalUrl = req.originalUrl
+        originalUrl = originalUrl.replace('action/', '')
+        return require('url').parse(contentServiceBaseUrl + originalUrl).path
+      }
+    })
+  )
+
+  app.use(
+    '/action/content/v3/flag/reject/*',
+    requestMiddleware.validateUserToken,
+    proxy(contentRepoBaseUrl, {
+      limit: reqDataLimitOfContentUpload,
+      proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+        proxyReqOpts.headers['Authorization'] = contentRepoApiKey
+        return proxyReqOpts
+      },
+      proxyReqPathResolver: function (req) {
+        var originalUrl = req.originalUrl
+        originalUrl = originalUrl.replace('action/', '')
+        return require('url').parse(contentRepoBaseUrl + originalUrl).path
+      }
+    })
+  )
+
+  app.use(
+    '/action/content/v3/flag/*',
+    requestMiddleware.validateUserToken,
+    proxy(contentServiceBaseUrl, {
+      limit: reqDataLimitOfContentUpload,
+      proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+        proxyReqOpts.headers['Authorization'] = contentRepoApiKey
+        return proxyReqOpts
+      },
+      proxyReqPathResolver: function (req) {
+        var originalUrl = req.originalUrl
+        originalUrl = originalUrl.replace('action/', '')
+        return require('url').parse(contentServiceBaseUrl + originalUrl).path
+      }
+    })
+  )
+
   app
     .route(
       '/action/dialcode/v1/reserve/:contentId'
@@ -387,6 +562,41 @@ module.exports = function (app) {
       }
     })
   )
+
+  app.use(
+    '/action/itemset/*',
+    requestMiddleware.validateUserToken,
+    proxy(assessmentServiceBaseUrl, {
+      limit: reqDataLimitOfContentUpload,
+      proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+        proxyReqOpts.headers['Authorization'] = contentRepoApiKey
+        return proxyReqOpts
+      },
+      proxyReqPathResolver: function (req) {
+        var originalUrl = req.originalUrl
+        originalUrl = originalUrl.replace('action/', '')
+        return require('url').parse(assessmentServiceBaseUrl + originalUrl).path
+      }
+    })
+  )
+
+  app.use(
+    '/action/channel/v3/*',
+    requestMiddleware.validateUserToken,
+    proxy(contentServiceBaseUrl, {
+      limit: reqDataLimitOfContentUpload,
+      proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+        proxyReqOpts.headers['Authorization'] = contentRepoApiKey
+        return proxyReqOpts
+      },
+      proxyReqPathResolver: function (req) {
+        var originalUrl = req.originalUrl
+        originalUrl = originalUrl.replace('action/', '')
+        return require('url').parse(contentServiceBaseUrl + originalUrl).path
+      }
+    })
+  )
+
   app.use(
     '/action/*',
     requestMiddleware.validateUserToken,

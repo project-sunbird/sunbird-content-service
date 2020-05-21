@@ -5,7 +5,6 @@
  */
 
 var async = require('async')
-var path = require('path')
 var contentProvider = require('sb_content_provider_util')
 var respUtil = require('response_util')
 var logger = require('sb_logger_util_v2')
@@ -18,7 +17,6 @@ var utilsService = require('../service/utilsService')
 var lodash = require('lodash')
 var emailMessage = messageUtils.EMAIL
 
-var filename = path.basename(__filename)
 var contentMessage = messageUtils.CONTENT
 var responseCode = messageUtils.RESPONSE_CODE
 
@@ -54,7 +52,7 @@ function updateCollaborators (req, response) {
     function (CBW) {
       var qs = {
         mode: 'edit',
-        fields: 'versionKey, collaborators, contentType, name, mimeType, framework, status'
+        fields: 'versionKey,collaborators,contentType,name,mimeType,framework,status'
       }
 
       logger.debug({
@@ -191,8 +189,6 @@ function compareCollaborators (req, contentInfo, oldCollaboratorsArray, newColla
  */
 function notifyCollaborators (req, cData, collaboratorsArray, emailType) {
   if (!lodash.isEmpty(collaboratorsArray)) {
-    var rspObj = req.rspObj
-
     async.waterfall([
       function (CBW) {
         var eData = emailType === 'addCollaborators' ? emailMessage.ADD_COLLABORATORS

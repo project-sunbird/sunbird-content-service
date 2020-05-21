@@ -29,6 +29,11 @@ globalEkstepProxyBaseUrl = process.env.sunbird_content_plugin_base_url ? process
 const contentRepoBaseUrl = process.env.sunbird_content_repo_api_base_url || 'https://qa.ekstep.in/api'
 const contentRepoApiKey = process.env.sunbird_content_repo_api_key
 
+const contentServiceBaseUrl = process.env.sunbird_contnet_service_base_url || 'http://content-service:9000'
+const contentServiceAuthToken = process.env.sunbird_content_service_auth_token
+
+const assessmentServiceBaseUrl = process.env.sunbird_assessment_service_base_url || 'http://assessment-service:9000'
+
 const learnerServiceLocalBaseUrl = process.env.sunbird_learner_service_local_base_url
   ? process.env.sunbird_learner_service_local_base_url
   : 'http://learner-service:9000'
@@ -50,10 +55,13 @@ const producerId = process.env.sunbird_environment + '.' + process.env.sunbird_i
 const sunbirdPortalBaseUrl = process.env.sunbird_portal_base_url || 'https://staging.open-sunbird.org'
 const lockExpiryTime = process.env.sunbird_lock_expiry_time || 3600
 const isHealthCheckEnabled = process.env.sunbird_health_check_enable || 'true'
-const contentServiceLocalBaseUrl = process.env.sunbird_content_service_local_base_url ? process.env.sunbird_content_service_local_base_url : 'http://content-service:5000'
+const contentServiceLocalBaseUrl = process.env.sunbird_content_service_local_base_url ? process.env.sunbird_content_service_local_base_url : 'http://knowledge-mw-service:5000'
 const sunbirdGzipEnable = process.env.sunbird_gzip_enable || 'true'
 
 configUtil.setContentProviderApi(contentProviderApiConfig.API)
+configUtil.setConfig('CONTENT_SERVICE_BASE_URL', contentServiceBaseUrl)
+configUtil.setConfig('CONTENT_SERVICE_AUTH_TOKEN', contentServiceAuthToken)
+configUtil.setConfig('ASSESSMENT_SERVICE_BASE_URL', assessmentServiceBaseUrl)
 configUtil.setConfig('CONTENT_REPO_BASE_URL', contentRepoBaseUrl)
 configUtil.setConfig('TELEMETRY_BASE_URL', telemetryBaseUrl)
 configUtil.setConfig('CONTENT_REPO_AUTHORIZATION_TOKEN', 'Bearer ' + contentRepoApiKey)
@@ -148,7 +156,7 @@ app.use(function (req, res, next) {
     res.sendStatus(200)
   } else {
     next()
-  };
+  }
 })
 
 require('./routes/healthCheckRoutes')(app)
@@ -187,7 +195,7 @@ function startServer () {
       process.exit(1)
     })
   })
-  this.server.keepAliveTimeout = 60000 * 5;
+  this.server.keepAliveTimeout = 60000 * 5
 }
 
 // Create server

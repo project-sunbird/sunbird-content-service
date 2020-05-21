@@ -8,7 +8,6 @@ var async = require('async')
 var multiparty = require('multiparty')
 var fs = require('fs')
 var randomString = require('randomstring')
-var path = require('path')
 var contentProvider = require('sb_content_provider_util')
 var respUtil = require('response_util')
 var logger = require('sb_logger_util_v2')
@@ -21,11 +20,11 @@ var messageUtils = require('./messageUtil')
 var utilsService = require('../service/utilsService')
 var emailService = require('./emailService')
 var orgHelper = require('../helpers/orgHelper')
+var licenseHelper = require('../helpers/licenseHelper')
 
 var CacheManager = require('sb_cache_manager')
 var cacheManager = new CacheManager({})
 
-var filename = path.basename(__filename)
 var contentMessage = messageUtils.CONTENT
 var compositeMessage = messageUtils.COMPOSITE
 var responseCode = messageUtils.RESPONSE_CODE
@@ -35,7 +34,7 @@ var reqMsg = messageUtils.REQUEST
  * This function helps to generate code for create course
  * @returns {String}
  */
-function getCode() {
+function getCode () {
   return contentMessage.PREFIX_CODE + randomString.generate(6)
 }
 
@@ -51,19 +50,19 @@ function getCode() {
  * This function return the contentType for create course
  * @returns {String}
  */
-function getContentTypeForContent() {
+function getContentTypeForContent () {
   return contentMessage.CONTENT_TYPE
 }
 
-function searchAPI(req, response) {
+function searchAPI (req, response) {
   return search(compositeMessage.CONTENT_TYPE, req, response)
 }
 
-function searchContentAPI(req, response) {
+function searchContentAPI (req, response) {
   return search(getContentTypeForContent(), req, response, ['Content'])
 }
 
-function search(defaultContentTypes, req, response, objectType) {
+function search (defaultContentTypes, req, response, objectType) {
   var data = req.body
   var rspObj = req.rspObj
 
@@ -159,7 +158,9 @@ function search(defaultContentTypes, req, response, objectType) {
         }
       })
     },
-
+    function (res, CBW) {
+      licenseHelper.includeLicenseDetails(req, res, CBW)
+    },
     function (res) {
       rspObj.result = res.result
       logger.debug({
@@ -174,7 +175,7 @@ function search(defaultContentTypes, req, response, objectType) {
   ])
 }
 
-function getFrameworkDetails(req, CBW) {
+function getFrameworkDetails (req, CBW) {
   cacheManager.get(req.query.framework, function (err, data) {
     if (err || !data) {
       contentProvider.getFrameworkById(req.query.framework, '', req.headers, function (err, result) {
@@ -186,7 +187,9 @@ function getFrameworkDetails(req, CBW) {
           cacheManager.set({ key: req.query.framework, value: result },
             function (err, data) {
               if (err) {
-                logger.error({ msg: `Setting framework cache data failed ${lodash.get(req.query, 'framework')}`, err }, req)
+                logger.error({
+                  msg: `Setting framework cache data failed ${lodash.get(req.query, 'framework')}`, err
+                }, req)
               } else {
                 logger.debug({ msg: `Setting framework cache data success ${lodash.get(req.query, 'framework')}` }, req)
               }
@@ -200,7 +203,7 @@ function getFrameworkDetails(req, CBW) {
   })
 }
 
-function modifyFacetsData(searchData, frameworkData, language) {
+function modifyFacetsData (searchData, frameworkData, language) {
   lodash.forEach(searchData, (facets) => {
     lodash.forEach(frameworkData, (categories) => {
       if (categories.code === facets.name) {
@@ -220,7 +223,7 @@ function modifyFacetsData(searchData, frameworkData, language) {
   })
 }
 
-function parseTranslationData(data, language) {
+function parseTranslationData (data, language) {
   try {
     return lodash.get(JSON.parse(data), language) || null
   } catch (e) {
@@ -235,7 +238,7 @@ function parseTranslationData(data, language) {
  * @param {type} response
  * @returns {object} return response object with htpp status
  */
-function createContentAPI(req, response) {
+function createContentAPI (req, response) {
   var data = req.body
   var rspObj = req.rspObj
 
@@ -310,7 +313,7 @@ function createContentAPI(req, response) {
  * @param {type} response
  * @returns {unresolved}
  */
-function updateContentAPI(req, response) {
+function updateContentAPI (req, response) {
   var data = req.body
   data.contentId = req.params.contentId
 
@@ -427,7 +430,7 @@ function updateContentAPI(req, response) {
   ])
 }
 
-function uploadContentAPI(req, response) {
+function uploadContentAPI (req, response) {
   var data = req.body
   data.contentId = req.params.contentId
   data.queryParams = req.query
@@ -574,7 +577,7 @@ function uploadContentAPI(req, response) {
   }
 }
 
-function reviewContentAPI(req, response) {
+function reviewContentAPI (req, response) {
   logger.debug({ msg: 'Request for review came' }, req)
   var data = {
     body: req.body
@@ -643,7 +646,7 @@ function reviewContentAPI(req, response) {
   ])
 }
 
-function publishContentAPI(req, response) {
+function publishContentAPI (req, response) {
   var data = req.body
   var rspObj = req.rspObj
   data.contentId = req.params.contentId
@@ -729,7 +732,7 @@ function publishContentAPI(req, response) {
   ])
 }
 
-function getContentAPI(req, response) {
+function getContentAPI (req, response) {
   var data = {}
   data.body = req.body
   data.contentId = req.params.contentId
@@ -801,6 +804,9 @@ function getContentAPI(req, response) {
     function (res, CBW) {
       orgHelper.includeOrgDetails(req, res, CBW)
     },
+    function (res, CBW) {
+      licenseHelper.includeLicenseDetails(req, res, CBW)
+    },
     function (resp, CBW) {
       if (lodash.get(resp, 'result.content.assets')) {
         var ekStepReqData = {
@@ -856,7 +862,7 @@ function getContentAPI(req, response) {
   ])
 }
 
-function getMyContentAPI(req, response) {
+function getMyContentAPI (req, response) {
   var request = {
     'filters': {
       // "createdBy": req.userId
@@ -921,7 +927,7 @@ function getMyContentAPI(req, response) {
   ])
 }
 
-function retireContentAPI(req, response) {
+function retireContentAPI (req, response) {
   var data = req.body
   var rspObj = req.rspObj
   var failedContent = []
@@ -953,18 +959,19 @@ function retireContentAPI(req, response) {
     function (CBW) {
       var ekStepReqData = {
         request: {
-          search: {
-            identifier: data.request.contentIds
+          filters: {
+            identifier: data.request.contentIds,
+            status: []
           }
         }
       }
-      contentProvider.searchContent(ekStepReqData, req.headers, function (err, res) {
+      contentProvider.compositeSearch(ekStepReqData, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
           rspObj.errCode = res && res.params ? res.params.err : contentMessage.SEARCH.FAILED_CODE
           rspObj.errMsg = res && res.params ? res.params.errmsg : contentMessage.SEARCH.FAILED_MESSAGE
           rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
           logger.error({
-            msg: 'Getting error from content provider while searching content',
+            msg: 'Getting error from content provider composite search',
             err: {
               err,
               errCode: rspObj.errCode,
@@ -1050,7 +1057,7 @@ function retireContentAPI(req, response) {
   ])
 }
 
-function rejectContentAPI(req, response) {
+function rejectContentAPI (req, response) {
   var data = {
     body: req.body
   }
@@ -1129,7 +1136,7 @@ function rejectContentAPI(req, response) {
   ])
 }
 
-function flagContentAPI(req, response) {
+function flagContentAPI (req, response) {
   // var data = req.body
   // data.contentId = req.params.contentId
   // var rspObj = req.rspObj
@@ -1187,7 +1194,7 @@ function flagContentAPI(req, response) {
   return response.status(200).send(respUtil.successResponse({}))
 }
 
-function acceptFlagContentAPI(req, response) {
+function acceptFlagContentAPI (req, response) {
   var data = req.body
   data.contentId = req.params.contentId
   var rspObj = req.rspObj
@@ -1267,7 +1274,7 @@ function acceptFlagContentAPI(req, response) {
   ])
 }
 
-function rejectFlagContentAPI(req, response) {
+function rejectFlagContentAPI (req, response) {
   var data = req.body
   data.contentId = req.params.contentId
   var rspObj = req.rspObj
@@ -1346,7 +1353,7 @@ function rejectFlagContentAPI(req, response) {
   ])
 }
 
-function uploadContentUrlAPI(req, response) {
+function uploadContentUrlAPI (req, response) {
   var data = req.body
   data.contentId = req.params.contentId
   var rspObj = req.rspObj
@@ -1425,7 +1432,7 @@ function uploadContentUrlAPI(req, response) {
   ])
 }
 
-function unlistedPublishContentAPI(req, response) {
+function unlistedPublishContentAPI (req, response) {
   var data = req.body
   var rspObj = req.rspObj
   data.contentId = req.params.contentId
@@ -1506,7 +1513,7 @@ function unlistedPublishContentAPI(req, response) {
   ])
 }
 
-function assignBadge(req, response) {
+function assignBadge (req, response) {
   var data = req.body
   data.contentId = req.params.contentId
   var rspObj = req.rspObj
@@ -1620,7 +1627,7 @@ function assignBadge(req, response) {
   }])
 }
 
-function revokeBadge(req, response) {
+function revokeBadge (req, response) {
   var data = req.body
   data.contentId = req.params.contentId
   var rspObj = req.rspObj
@@ -1738,7 +1745,7 @@ function revokeBadge(req, response) {
  * @param {type} response
  * @returns {unresolved}
  */
-function copyContentAPI(req, response) {
+function copyContentAPI (req, response) {
   var data = req.body
   data.contentId = req.params.contentId
   var rspObj = req.rspObj
@@ -1818,7 +1825,7 @@ function copyContentAPI(req, response) {
   ])
 }
 
-function searchPluginsAPI(req, response, objectType) {
+function searchPluginsAPI (req, response, objectType) {
   var data = req.body
   var rspObj = req.rspObj
 
@@ -1885,13 +1892,16 @@ function searchPluginsAPI(req, response, objectType) {
 
     function (res) {
       rspObj.result = res.result
-      logger.debug({ msg: 'Content searched successfully', additionalInfo: { count: lodash.get(rspObj.result, 'count') } }, req)
+      logger.debug({
+        msg: 'Content searched successfully',
+        additionalInfo: { count: lodash.get(rspObj.result, 'count')
+        }}, req)
       return response.status(200).send(respUtil.successResponse(rspObj))
     }
   ])
 }
 
-function validateContentLock(req, response) {
+function validateContentLock (req, response) {
   var rspObj = req.rspObj
   var userId = req.get('x-authenticated-userid')
   logger.debug({ msg: 'contentService.validateContentLock() called', additionalInfo: { rspObj } }, req)
@@ -1921,7 +1931,9 @@ function validateContentLock(req, response) {
         rspObj.result.validation = false
         rspObj.result.message = 'You are not authorized'
         logger.error({
-          msg: 'You are not authorized', additionalInfo: { userId, createdBy: res.result.content.createdBy }, err: { errMsg: rspObj.result.message }
+          msg: 'You are not authorized',
+          additionalInfo: { userId, createdBy: res.result.content.createdBy },
+          err: { errMsg: rspObj.result.message }
         }, req)
         return response.status(200).send(respUtil.successResponse(rspObj))
       } else {

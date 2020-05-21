@@ -16,14 +16,6 @@ module.exports = function (app) {
     .get(healthService.checkDependantServiceHealth(dependentServiceHealth),
       requestMiddleware.createAndValidateRequestBody, channelService.getChannelValuesById)
 
-  app.route(BASE_URL_V1_channel + '/list')
-    .post(healthService.checkDependantServiceHealth(dependentServiceHealth),
-      requestMiddleware.createAndValidateRequestBody, channelService.ChannelList)
-
-  app.route(BASE_URL_V1_channel + '/search')
-    .post(healthService.checkDependantServiceHealth(dependentServiceHealth),
-      requestMiddleware.createAndValidateRequestBody, channelService.ChannelSearch)
-
   app.route(BASE_URL_V1_channel + '/create')
     .post(healthService.checkDependantServiceHealth(dependentServiceHealth),
       requestMiddleware.createAndValidateRequestBody, channelService.ChannelCreate)

@@ -1,5 +1,8 @@
 {
     "orgCacheExpiryTime": 1800,
     "orgfieldsAllowedToSend": ["email","orgName"],
-    "orgCacheKeyNamePrefix" : "orgdata-"
+    "orgCacheKeyNamePrefix" : "orgdata-",
+    "readableLicenseFields": ["name", "url", "description"],
+    "licenseCacheKeyNamePrefix": "license-",
+    "licenseCacheExpiryTime": 1800
 }   

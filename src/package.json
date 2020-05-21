@@ -24,6 +24,7 @@
     "body-parser": "^1.14.2",
     "cassandra-driver": "^3.4.1",
     "compression": "^1.7.4",
+    "date-fns": "2.0.0",
     "express": "^4.13.3",
     "express-cassandra": "2.1.0",
     "express-http-proxy": "^1.0.3",

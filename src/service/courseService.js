@@ -6,7 +6,6 @@
 
 var async = require('async')
 var randomString = require('randomstring')
-var path = require('path')
 var contentProvider = require('sb_content_provider_util')
 var respUtil = require('response_util')
 var validatorUtil = require('sb_req_validator_util')
@@ -18,10 +17,10 @@ var courseModel = require('../models/courseModel').COURSE
 var messageUtils = require('./messageUtil')
 var utilsService = require('../service/utilsService')
 var orgHelper = require('../helpers/orgHelper')
+var licenseHelper = require('../helpers/licenseHelper')
 var CacheManager = require('sb_cache_manager')
 var cacheManager = new CacheManager({})
 
-var filename = path.basename(__filename)
 var courseMessage = messageUtils.COURSE
 var responseCode = messageUtils.RESPONSE_CODE
 
@@ -143,7 +142,7 @@ function searchCourseAPI (req, response) {
           if (req.query.framework && req.query.framework !== 'null') {
             getFrameworkDetails(req, function (err, data) {
               if (err || res.responseCode !== responseCode.SUCCESS) {
-                logger.error({msg: 'Error while fetching framework details', additionalInfo: {framework: req.query.framework}}, req)
+                logger.error({msg: 'Error - framework details', additionalInfo: {framework: req.query.framework}}, req)
                 rspObj.result = res.result
                 return response.status(200).send(respUtil.successResponse(rspObj))
               } else {
@@ -160,6 +159,9 @@ function searchCourseAPI (req, response) {
           }
         }
       })
+    },
+    function (res, CBW) {
+      licenseHelper.includeLicenseDetails(req, res, CBW)
     },
     function (res) {
       rspObj.result = res.result
@@ -178,15 +180,15 @@ function getFrameworkDetails (req, CBW) {
     if (err || !data) {
       contentProvider.getFrameworkById(req.query.framework, '', req.headers, function (err, result) {
         if (err || result.responseCode !== responseCode.SUCCESS) {
-          logger.error({msg: 'Error while fetching framework details', err, additionalInfo: {framework: req.query.framework}}, req)
+          logger.error({msg: 'Error - framework details', err, additionalInfo: {framework: req.query.framework}}, req)
           CBW(new Error('Fetching framework data failed'), null)
         } else {
           cacheManager.set({ key: req.query.framework, value: result },
             function (err, data) {
               if (err) {
-                logger.error({msg: 'Error while caching framework details', err, additionalInfo: {framework: req.query.framework}}, req)
+                logger.error({msg: 'Error - caching', err, additionalInfo: {framework: req.query.framework}}, req)
               } else {
-                logger.debug({msg: 'Caching framework details successful', additionalInfo: {framework: req.query.framework}}, req)
+                logger.debug({msg: 'Caching framework - done', additionalInfo: {framework: req.query.framework}}, req)
               }
             })
           CBW(null, result)
@@ -597,6 +599,9 @@ function getCourseAPI (req, response) {
     function (res, CBW) {
       orgHelper.includeOrgDetails(req, res, CBW)
     },
+    function (res, CBW) {
+      licenseHelper.includeLicenseDetails(req, res, CBW)
+    },
     function (res) {
       rspObj.result = transformResBody(res.result, 'content', 'course')
       return response.status(200).send(respUtil.successResponse(rspObj))
@@ -729,6 +734,9 @@ function getCourseHierarchyAPI (req, response) {
     },
     function (res, CBW) {
       orgHelper.includeOrgDetails(req, res, CBW)
+    },
+    function (res, CBW) {
+      licenseHelper.includeLicenseDetails(req, res, CBW)
     },
     function (res) {
       rspObj.result = res.result

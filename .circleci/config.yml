@@ -2,23 +2,32 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: node:6-alpine
+      - image: circleci/node:9.0.0
+    working_directory: ~/project/src
     steps:
       - checkout
-      - run: apk add zip git
-      - run: apk add python make g++
       - run: git submodule update --init --recursive src/libs
       - run: mkdir -p opt/content && cp -r src/* opt/content/
       - restore_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
+          key: dependency-cache-{{ checksum "src/package.json" }}
       - run: cd opt/content/ && npm install --unsafe-perm
       - save_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
+          key: dependency-cache-{{ checksum "src/package.json" }}
           paths: ./node_modules
       - run: cd opt && zip -r content.zip content
       - store_artifacts:
           path: opt/content.zip 
           destination: content.zip
+      - run: 
+          name: Install sonar scanner
+          command: 'sudo npm install -g sonarqube-scanner'
+          
+      - run: 
+          name: Sonar scanner
+          command: |
+                  sonar-scanner
+                  
+                  
 workflows:
   version: 2.1
   build_and_test:
