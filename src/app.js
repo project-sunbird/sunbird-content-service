@@ -10,6 +10,7 @@ var fs = require('fs')
 var configUtil = require('sb-config-util')
 var _ = require('lodash')
 var logger = require('sb_logger_util_v2')
+const gracefulShutdown = require('http-graceful-shutdown');
 
 const contentProvider = require('sb_content_provider_util')
 var contentMetaProvider = require('./contentMetaFilter')
@@ -182,6 +183,7 @@ function startServer () {
   this.server = http.createServer(app).listen(port, function () {
     logger.info({ msg: `server running at PORT ${port}` })
     logger.debug({ msg: `server started at ${new Date()}` })
+    handleShutDowns();
     if (!process.env.sunbird_environment || !process.env.sunbird_instance) {
       logger.fatal({
         msg: `please set environment variable sunbird_environment, sunbird_instance' +
@@ -197,7 +199,21 @@ function startServer () {
   })
   this.server.keepAliveTimeout = 30000 * 5
 }
+function handleShutDowns(){
+  const cleanup = signal => new Promise(async (resolve, reject) => { // close db connections
+    await require('./utils/cassandraUtil').closeCassandraConnection();
+    console.log(`Closed db connection after ${signal} signal.`);
+    resolve();
+  });
 
+  gracefulShutdown(this.server, {
+    signals: 'SIGINT SIGTERM',
+    timeout: 60 * 1000, // forcefully shutdown if not closed gracefully after 1 min
+    onShutdown: cleanup,
+    finally: () => console.log('Server gracefully shut down.'),
+    development: process.env.sunbird_environment === 'local' ? true : false, // in dev mode skip graceful shutdown 
+  });
+}
 // Create server
 configUtil.setConfig('DEFAULT_CHANNEL', 'sunbird')
 if (defaultChannel) {

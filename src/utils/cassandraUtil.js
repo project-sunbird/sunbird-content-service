@@ -4,7 +4,7 @@ var contactPoints = process.env.sunbird_cassandra_urls.split(',')
 var cassandraDriver = require('cassandra-driver')
 var consistency = getConsistencyLevel(process.env.sunbird_cassandra_consistency_level)
 var envReplicationStrategy = process.env.sunbird_cassandra_replication_strategy ||
-'{"class":"SimpleStrategy","replication_factor":1}'
+  '{"class":"SimpleStrategy","replication_factor":1}'
 var replicationStrategy = getReplicationStrategy(envReplicationStrategy)
 
 var keyspaceConfig = [{
@@ -16,6 +16,7 @@ var keyspaceConfig = [{
 }]
 
 var connection = {}
+var connectionCount = 0;
 _.forEach(keyspaceConfig, config => {
   var models = cassandra.createClient({
     clientOptions: {
@@ -36,15 +37,18 @@ _.forEach(keyspaceConfig, config => {
         console.log('sync failed for keyspace and table', schema.table_name)
       }
     })
+    if(!connection[config.name]){ // to avoid duplicate connection
+      connectionCount++;
+    }
     connection[config.name] = models
   })
 })
 
-function getConnections (keyspace) {
+function getConnections(keyspace) {
   return connection[keyspace]
 }
 
-function checkCassandraDBHealth (callback) {
+function checkCassandraDBHealth(callback) {
   const client = new cassandraDriver.Client({ contactPoints: contactPoints })
   client.connect()
     .then(function () {
@@ -58,13 +62,13 @@ function checkCassandraDBHealth (callback) {
     })
 }
 
-function getConsistencyLevel (consistency) {
+function getConsistencyLevel(consistency) {
   let consistencyValue = consistency && _.get(cassandra, `consistencies.${consistency}`)
     ? _.get(cassandra, `consistencies.${consistency}`) : cassandra.consistencies.one
   return consistencyValue
 }
 
-function getReplicationStrategy (replicationstrategy) {
+function getReplicationStrategy(replicationstrategy) {
   try {
     return JSON.parse(replicationstrategy)
   } catch (e) {
@@ -72,5 +76,26 @@ function getReplicationStrategy (replicationstrategy) {
     return { 'class': 'SimpleStrategy', 'replication_factor': 1 }
   }
 }
+function closeCassandraConnection() {
+  console.log("connection to be closed", connectionCount);
+  if (!connectionCount) {
+    return Promise.resolve();
+  }
+  return new Promise((resolve, reject) => {
+    _.forIn(connection, (connection, keySpace) => {
+      connection.close((err) => {
+        if (err) {
+          console.error('error while closing cassandra connection', err);
+        }
+        connectionCount--;
+        console.log("closed connection for keySpace:", keySpace, connectionCount);
+        if (!connectionCount) {
+          resolve();
+        }
+      })
+    });
+  });
 
-module.exports = { getConnections, checkCassandraDBHealth }
+  return Promise.resolve();
+}
+module.exports = { getConnections, checkCassandraDBHealth, closeCassandraConnection }
