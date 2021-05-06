@@ -51,7 +51,7 @@
     "sb_req_validator_util": "file:libs/sb_req_validator_util",
     "sb_telemetry_util": "file:libs/sb_telemetry_util",
     "string-to-stream": "1.1.1",
-    "underscore": "^1.8.3",
+    "underscore": "^1.12.1",
     "url-metadata": "^2.1.7",
     "uuid": "^3.0.1",
     "zip-folder": "1.0.0"
