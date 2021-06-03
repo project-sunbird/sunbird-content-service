@@ -14,12 +14,13 @@ var configUtil = require('sb-config-util')
 var contentModel = require('../models/contentModel').CONTENT
 var messageUtils = require('./messageUtil')
 var utilsService = require('../service/utilsService')
+var configData = require('../config/constants.json')
 var lodash = require('lodash')
 var emailMessage = messageUtils.EMAIL
 
 var contentMessage = messageUtils.CONTENT
 var responseCode = messageUtils.RESPONSE_CODE
-const SERVICE_PREFIX = 'COL'
+const SERVICE_PREFIX = `${configData.serviceCode}_COL`
 
 function updateCollaborators (req, response) {
   var data = req.body

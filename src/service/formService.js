@@ -11,11 +11,12 @@ var contentProvider = require('sb_content_provider_util')
 var logger = require('sb_logger_util_v2')
 var messageUtils = require('./messageUtil')
 var utilsService = require('../service/utilsService')
+var configData = require('../config/constants.json')
 
 var filename = path.basename(__filename)
 var formMessages = messageUtils.FORM
 var responseCode = messageUtils.RESPONSE_CODE
-const SERVICE_PREFIX = 'FRM'
+const SERVICE_PREFIX = `${configData.serviceCode}_FRM`
 
 /**
  * This controller function helps to get form data

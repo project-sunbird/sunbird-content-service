@@ -20,10 +20,11 @@ var orgHelper = require('../helpers/orgHelper')
 var licenseHelper = require('../helpers/licenseHelper')
 var CacheManager = require('sb_cache_manager')
 var cacheManager = new CacheManager({})
+var configData = require('../config/constants.json')
 
 var courseMessage = messageUtils.COURSE
 var responseCode = messageUtils.RESPONSE_CODE
-const SERVICE_PREFIX = 'COU'
+const SERVICE_PREFIX = `${configData.serviceCode}_COU`
 
 /**
  * This function help to transform the object body with oldKey and newKey

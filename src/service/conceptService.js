@@ -15,6 +15,8 @@ var utilsService = require('../service/utilsService')
 var filename = path.basename(__filename)
 var domainMessage = messageUtils.DOMAIN
 var responseCode = messageUtils.RESPONSE_CODE
+var configData = require('../config/constants.json')
+const SERVICE_PREFIX = `${configData.serviceCode}_CNC`
 
 /**
  * This function helps to get all domain from content provider
@@ -33,7 +35,7 @@ function getDomainsAPI(req, response) {
       logger.debug({ msg: 'Request to content provider to get all domains', additionalInfo: { data } }, req)
       contentProvider.getDomains(req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
-          rspObj.errCode = domainMessage.GET_DOMAINS.FAILED_CODE
+          rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.GET_DOMAINS.FAILED_ERR_CODE}`
           rspObj.errMsg = domainMessage.GET_DOMAINS.FAILED_MESSAGE
           rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
           logger.error({
@@ -75,7 +77,7 @@ function getDomainByIDAPI(req, response) {
   data.domainId = req.params.domainId
 
   if (!data.domainId) {
-    rspObj.errCode = domainMessage.GET_DOMAIN_BY_ID.MISSING_CODE
+    rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.GET_DOMAIN_BY_ID.MISSING_ERR_CODE}`
     rspObj.errMsg = domainMessage.GET_DOMAIN_BY_ID.MISSING_MESSAGE
     rspObj.responseCode = responseCode.CLIENT_ERROR
     logger.error({
@@ -96,7 +98,7 @@ function getDomainByIDAPI(req, response) {
       logger.debug({ msg: 'Request to content provider to get domain by Id', additionalInfo: { data } }, req)
       contentProvider.getDomainById(data.domainId, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
-          rspObj.errCode = domainMessage.GET_DOMAIN_BY_ID.FAILED_CODE
+          rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.GET_DOMAIN_BY_ID.FAILED_ERR_CODE}`
           rspObj.errMsg = domainMessage.GET_DOMAIN_BY_ID.FAILED_MESSAGE
           rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
           logger.error({
@@ -138,7 +140,7 @@ function getObjectTypesAPI(req, response) {
   data.objectType = req.params.objectType
 
   if (!data.domainId || !data.objectType) {
-    rspObj.errCode = domainMessage.GET_OBJECTS.MISSING_CODE
+    rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.GET_OBJECTS.MISSING_ERR_CODE}`
     rspObj.errMsg = domainMessage.GET_OBJECTS.MISSING_MESSAGE
     rspObj.responseCode = responseCode.CLIENT_ERROR
     logger.error({
@@ -159,7 +161,7 @@ function getObjectTypesAPI(req, response) {
       logger.debug({ msg: 'Request to content provider to get Object Types ', additionalInfo: { data } }, req)
       contentProvider.getObjects(data.domainId, data.objectType, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
-          rspObj.errCode = domainMessage.GET_OBJECTS.FAILED_CODE
+          rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.GET_OBJECTS.FAILED_ERR_CODE}`
           rspObj.errMsg = domainMessage.GET_OBJECTS.FAILED_MESSAGE
           rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
           logger.error({
@@ -202,7 +204,7 @@ function getObjectTypeByIDAPI(req, response) {
   data.objectId = req.params.objectId
 
   if (!data.domainId || !data.objectType || !data.objectId) {
-    rspObj.errCode = domainMessage.GET_OBJECT_BY_ID.MISSING_CODE
+    rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.GET_OBJECT_BY_ID.MISSING_ERR_CODE}`
     rspObj.errMsg = domainMessage.GET_OBJECT_BY_ID.MISSING_MESSAGE
     rspObj.responseCode = responseCode.CLIENT_ERROR
     logger.error({
@@ -223,7 +225,7 @@ function getObjectTypeByIDAPI(req, response) {
       logger.debug({ msg: 'Request to content provider to get Object Types by Id', additionalInfo: { data } }, req)
       contentProvider.getObjectById(data.domainId, data.objectType, data.objectId, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
-          rspObj.errCode = domainMessage.GET_OBJECT_BY_ID.FAILED_CODE
+          rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.GET_OBJECT_BY_ID.FAILED_ERR_CODE}`
           rspObj.errMsg = domainMessage.GET_OBJECT_BY_ID.FAILED_MESSAGE
           rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
           logger.error({
@@ -264,7 +266,7 @@ function getConceptByIdAPI(req, response) {
   data.conceptId = req.params.conceptId
 
   if (!data.conceptId) {
-    rspObj.errCode = domainMessage.GET_OBJECTS.MISSING_CODE
+    rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.GET_OBJECTS.MISSING_ERR_CODE}`
     rspObj.errMsg = domainMessage.GET_OBJECTS.MISSING_MESSAGE
     rspObj.responseCode = responseCode.CLIENT_ERROR
     logger.error({
@@ -285,7 +287,7 @@ function getConceptByIdAPI(req, response) {
       logger.debug({ msg: 'Request to content provider to get concept', additionalInfo: { data } }, req)
       contentProvider.getConceptById(data.conceptId, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
-          rspObj.errCode = domainMessage.GET_CONCEPT_BY_ID.FAILED_CODE
+          rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.GET_CONCEPT_BY_ID.FAILED_ERR_CODE}`
           rspObj.errMsg = domainMessage.GET_CONCEPT_BY_ID.FAILED_MESSAGE
           rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
           logger.error({
@@ -327,7 +329,7 @@ function searchObjectTypeAPI(req, response) {
   data.objectType = req.params.objectType
 
   if (!data.domainId || !data.objectType || !data.request || !data.request.search) {
-    rspObj.errCode = domainMessage.SEARCH_OBJECT_TYPE.MISSING_CODE
+    rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.SEARCH_OBJECT_TYPE.MISSING_ERR_CODE}`
     rspObj.errMsg = domainMessage.SEARCH_OBJECT_TYPE.MISSING_MESSAGE
     rspObj.responseCode = responseCode.CLIENT_ERROR
     logger.error({
@@ -353,7 +355,7 @@ function searchObjectTypeAPI(req, response) {
       contentProvider.searchObjectsType(ekStepReqData, data.domainId,
         data.objectType, req.headers, function (err, res) {
           if (err || res.responseCode !== responseCode.SUCCESS) {
-            rspObj.errCode = domainMessage.SEARCH_OBJECT_TYPE.FAILED_CODE
+            rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.SEARCH_OBJECT_TYPE.FAILED_ERR_CODE}`
             rspObj.errMsg = domainMessage.SEARCH_OBJECT_TYPE.FAILED_MESSAGE
             rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
             logger.error({
@@ -395,7 +397,7 @@ function createObjectTypeAPI(req, response) {
   data.objectType = req.params.objectType
 
   if (!data.domainId || !data.objectType || !data.request || !data.request.object) {
-    rspObj.errCode = domainMessage.CREATE_OBJECT_TYPE.MISSING_CODE
+    rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.CREATE_OBJECT_TYPE.MISSING_ERR_CODE}`
     rspObj.errMsg = domainMessage.CREATE_OBJECT_TYPE.MISSING_MESSAGE
     rspObj.responseCode = responseCode.CLIENT_ERROR
     logger.error({
@@ -420,7 +422,7 @@ function createObjectTypeAPI(req, response) {
       logger.debug({ msg: 'Request to content provider to create Object Type ', additionalInfo: { data } }, req)
       contentProvider.createObjectType(ekStepReqData, data.domainId, data.objectType, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
-          rspObj.errCode = domainMessage.CREATE_OBJECT_TYPE.FAILED_CODE
+          rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.CREATE_OBJECT_TYPE.FAILED_ERR_CODE}`
           rspObj.errMsg = domainMessage.CREATE_OBJECT_TYPE.FAILED_MESSAGE
           rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
           logger.error({
@@ -463,7 +465,7 @@ function updateObjectTypeAPI(req, response) {
   data.objectId = req.params.objectId
 
   if (!data.domainId || !data.objectType || !data.objectId || !data.request || !data.request.object) {
-    rspObj.errCode = domainMessage.UPDATE_OBJECT_TYPE.MISSING_CODE
+    rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.UPDATE_OBJECT_TYPE.MISSING_ERR_CODE}`
     rspObj.errMsg = domainMessage.UPDATE_OBJECT_TYPE.MISSING_MESSAGE
     rspObj.responseCode = responseCode.CLIENT_ERROR
     logger.error({
@@ -489,7 +491,7 @@ function updateObjectTypeAPI(req, response) {
       contentProvider.updateObjectType(ekStepReqData, data.domainId,
         data.objectType, data.objectId, req.headers, function (err, res) {
           if (err || res.responseCode !== responseCode.SUCCESS) {
-            rspObj.errCode = domainMessage.UPDATE_OBJECT_TYPE.FAILED_CODE
+            rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.UPDATE_OBJECT_TYPE.FAILED_ERR_CODE}`
             rspObj.errMsg = domainMessage.UPDATE_OBJECT_TYPE.FAILED_MESSAGE
             rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
             logger.error({
@@ -532,7 +534,7 @@ function retireObjectTypeAPI(req, response) {
   data.objectId = req.params.objectId
 
   if (!data.domainId || !data.objectType || !data.objectId) {
-    rspObj.errCode = domainMessage.RETIRE_OBJECT_TYPE.MISSING_CODE
+    rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.RETIRE_OBJECT_TYPE.MISSING_ERR_CODE}`
     rspObj.errMsg = domainMessage.RETIRE_OBJECT_TYPE.MISSING_MESSAGE
     rspObj.responseCode = responseCode.CLIENT_ERROR
     logger.error({
@@ -556,7 +558,7 @@ function retireObjectTypeAPI(req, response) {
       contentProvider.retireObjectType(ekStepReqData, data.domainId,
         data.objectType, data.objectId, req.headers, function (err, res) {
           if (err || res.responseCode !== responseCode.SUCCESS) {
-            rspObj.errCode = domainMessage.RETIRE_OBJECT_TYPE.FAILED_CODE
+            rspObj.errCode = `${SERVICE_PREFIX}_${domainMessage.RETIRE_OBJECT_TYPE.FAILED_ERR_CODE}`
             rspObj.errMsg = domainMessage.RETIRE_OBJECT_TYPE.FAILED_MESSAGE
             rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
             logger.error({

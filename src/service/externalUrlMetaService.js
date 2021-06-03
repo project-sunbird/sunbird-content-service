@@ -10,7 +10,8 @@ var responseCode = messageUtils.RESPONSE_CODE
 var respUtil = require('response_util')
 var utilsService = require('../service/utilsService')
 var logger = require('sb_logger_util_v2')
-const SERVICE_PREFIX = 'URL'
+var configData = require('../config/constants.json')
+const SERVICE_PREFIX = `${configData.serviceCode}_URL`
 
 function fetchUrlMetaAPI (req, response) {
   return fetchUrlMeta(req, response)

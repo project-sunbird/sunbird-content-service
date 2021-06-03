@@ -21,7 +21,7 @@ var utilsService = require('../service/utilsService')
 var emailService = require('./emailService')
 var orgHelper = require('../helpers/orgHelper')
 var licenseHelper = require('../helpers/licenseHelper')
-
+var configData = require('../config/constants.json')
 var CacheManager = require('sb_cache_manager')
 var cacheManager = new CacheManager({})
 
@@ -29,7 +29,7 @@ var contentMessage = messageUtils.CONTENT
 var compositeMessage = messageUtils.COMPOSITE
 var responseCode = messageUtils.RESPONSE_CODE
 var reqMsg = messageUtils.REQUEST
-const SERVICE_PREFIX = 'CNT';
+const SERVICE_PREFIX = `${configData.serviceCode}_CNT`;
 
 /**
  * This function helps to generate code for create course
@@ -72,7 +72,7 @@ function search (defaultContentTypes, req, response, objectType) {
   }, req)
 
   if (!data.request || !data.request.filters) {
-    rspObj.errCode = contentMessage.SEARCH.MISSING_ERR_CODE
+    rspObj.errCode = `${configData.serviceCode}_${contentMessage.SEARCH.MISSING_ERR_CODE}`
     rspObj.errMsg = contentMessage.SEARCH.MISSING_MESSAGE
     rspObj.responseCode = responseCode.CLIENT_ERROR
 
@@ -120,7 +120,7 @@ function search (defaultContentTypes, req, response, objectType) {
 
       contentProvider.compositeSearch(ekStepReqData, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
-          rspObj.errCode = res && res.params ? res.params.err : contentMessage.SEARCH.FAILED_ERR_CODE
+          rspObj.errCode = res && res.params ? res.params.err : `${configData.serviceCode}_${contentMessage.SEARCH.FAILED_ERR_CODE}`
           rspObj.errMsg = res && res.params ? res.params.errmsg : contentMessage.SEARCH.FAILED_MESSAGE
           rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
           logger.error({

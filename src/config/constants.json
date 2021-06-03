@@ -4,5 +4,6 @@
     "orgCacheKeyNamePrefix" : "orgdata-",
     "readableLicenseFields": ["name", "url", "description"],
     "licenseCacheKeyNamePrefix": "license-",
-    "licenseCacheExpiryTime": 1800
+    "licenseCacheExpiryTime": 1800,
+    "serviceCode": "KMW"
 }   

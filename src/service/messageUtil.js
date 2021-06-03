@@ -408,62 +408,79 @@ exports.UTILS = {
 exports.DOMAIN = {
 
   GET_DOMAINS: {
+    FAILED_ERR_CODE: 'DLS01',
     FAILED_CODE: 'ERR_GET_DOMAINS_FAILED',
     FAILED_MESSAGE: 'Get domains failed'
   },
 
   GET_DOMAIN_BY_ID: {
+    MISSING_ERR_CODE: 'DRD01',
     MISSING_CODE: 'ERR_GET_DOMAIN_BY_ID_FIELDS_MISSING',
     MISSING_MESSAGE: 'Required fields for get domain are missing',
+    FAILED_ERR_CODE: 'DRD02',
     FAILED_CODE: 'ERR_GET_DOMAIN_BY_ID_FAILED',
     FAILED_MESSAGE: 'Get domain failed'
   },
 
   GET_OBJECTS: {
+    MISSING_ERR_CODE: 'DOL01',
     MISSING_CODE: 'ERR_GET_OBJECTS_FIELDS_MISSING',
     MISSING_MESSAGE: 'Required fields for get objects are missing',
+    FAILED_ERR_CODE: 'DOL02',
     FAILED_CODE: 'ERR_GET_OBJECT_FAILED',
     FAILED_MESSAGE: 'Get objects failed'
   },
 
   GET_OBJECT_BY_ID: {
+    MISSING_ERR_CODE: 'DOS01',
     MISSING_CODE: 'ERR_GET_OBJECT_BY_ID_FIELDS_MISSING',
     MISSING_MESSAGE: 'Required fields for get object are missing',
+    FAILED_ERR_CODE: 'DOS02',
     FAILED_CODE: 'ERR_GET_OBJECT_BY_ID_FAILED',
     FAILED_MESSAGE: 'Get object failed'
   },
 
   GET_CONCEPT_BY_ID: {
+    MISSING_ERR_CODE: 'CRD01',
     MISSING_CODE: 'ERR_GET_CONCEPT_BY_ID_FIELDS_MISSING',
     MISSING_MESSAGE: 'Required fields for get concept are missing',
+    FAILED_ERR_CODE: 'CRD02',
     FAILED_CODE: 'ERR_GET_CONCEPT_BY_ID_FAILED',
     FAILED_MESSAGE: 'Get concept failed'
   },
 
   SEARCH_OBJECT_TYPE: {
+    MISSING_ERR_CODE: 'DOS01',
     MISSING_CODE: 'ERR_SEARCH_OBJECT_TYPE_FIELDS_MISSING',
     MISSING_MESSAGE: 'Required fields for search object type are missing',
+    FAILED_ERR_CODE: 'DOS02',
     FAILED_CODE: 'ERR_SEARCH_OBJECT_TYPE_FAILED',
     FAILED_MESSAGE: 'Search object type failed'
   },
 
   CREATE_OBJECT_TYPE: {
+    MISSING_ERR_CODE: 'DOC01',
     MISSING_CODE: 'ERR_CREATE_OBJECT_TYPE_FIELDS_MISSING',
     MISSING_MESSAGE: 'Required fields for create object type are missing',
+    FAILED_ERR_CODE: 'DOC02',
     FAILED_CODE: 'ERR_CREATE_OBJECT_TYPE_FAILED',
     FAILED_MESSAGE: 'Create object type failed'
   },
 
   UPDATE_OBJECT_TYPE: {
+    MISSING_ERR_CODE: 'DOU01',
     MISSING_CODE: 'ERR_UPDATE_OBJECT_TYPE_FIELDS_MISSING',
     MISSING_MESSAGE: 'Required fields for update object type are missing',
+    FAILED_ERR_CODE: 'DOU02',
     FAILED_CODE: 'ERR_UPDATE_OBJECT_TYPE_FAILED',
     FAILED_MESSAGE: 'Update object type failed'
   },
 
   RETIRE_OBJECT_TYPE: {
+    MISSING_ERR_CODE: 'DOR01',
     MISSING_CODE: 'ERR_RETIRE_OBJECT_TYPE_FIELDS_MISSING',
     MISSING_MESSAGE: 'Required fields for retire object type are missing',
+    FAILED_ERR_CODE: 'DOR02',
     FAILED_CODE: 'ERR_RETIRE_OBJECT_TYPE_FAILED',
     FAILED_MESSAGE: 'Retire object type failed'
   }

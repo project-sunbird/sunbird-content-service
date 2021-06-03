@@ -22,7 +22,8 @@ var contentMessage = messageUtils.CONTENT
 var responseCode = messageUtils.RESPONSE_CODE
 var defaultLockExpiryTime = parseInt(configUtil.getConfig('LOCK_EXPIRY_TIME'))
 var contentProvider = require('sb_content_provider_util')
-const SERVICE_PREFIX = 'LOC'
+var configData = require('../config/constants.json')
+const SERVICE_PREFIX = `${configData.serviceCode}_LOC`
 
 function createLock (req, response) {
   var lockId = dbModel.uuid()

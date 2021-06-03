@@ -18,10 +18,11 @@ var BatchImageService = require('./dialCode/batchImageService')
 var dialCodeServiceHelper = require('./dialCode/dialCodeServiceHelper')
 var dbModel = require('./../utils/cassandraUtil').getConnections('dialcodes')
 var ImageService = require('./dialCode/imageService.js')
+var configData = require('../config/constants.json')
 var filename = path.basename(__filename)
 var dialCodeMessage = messageUtils.DIALCODE
 var responseCode = messageUtils.RESPONSE_CODE
-const SERVICE_PREFIX = 'DLC'
+const SERVICE_PREFIX = `${configData.serviceCode}_DLC`
 
 function getBatchImageInstance (req) {
   let defaultConfig = {
