@@ -5,14 +5,11 @@
  */
 
 var async = require('async')
-var path = require('path')
 var respUtil = require('response_util')
 var ekStepUtil = require('sb_content_provider_util')
-var logger = require('sb_logger_util_v2')
 var messageUtils = require('./messageUtil')
 var utilsService = require('../service/utilsService')
-
-var filename = path.basename(__filename)
+var logger = require('sb_logger_util_v2')
 var responseCode = messageUtils.RESPONSE_CODE
 
 /**
@@ -33,6 +30,9 @@ function getFrameworkCategoryInstance (req, response) {
 
   if (!data.queryParams) {
     rspObj.responseCode = responseCode.CLIENT_ERROR
+    utilsService.logErrorInfo('getFrameworkCategoryInstance',
+      rspObj,
+      'Error due to missing request body or query Parameters or categoryId')
     logger.error({
       msg: 'Error due to missing request body or query Parameters or categoryId',
       err: {responseCode: rspObj.responseCode},
@@ -44,10 +44,13 @@ function getFrameworkCategoryInstance (req, response) {
   async.waterfall([
 
     function (CBW) {
+      utilsService.logDebugInfo('getFrameworkCategoryInstance', rspObj, 'Request to get Framework Category instance')
       logger.debug({ msg: 'Request to get Framework Category instance', additionalInfo: { data } }, req)
       ekStepUtil.getFrameworkCategoryInstance(data.queryParams, data.category, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
           rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
+          rspObj.errMsg = 'Error while fetching framework category instance from ekstep'
+          utilsService.logErrorInfo('getFrameworkCategoryInstance', rspObj, err)
           logger.error({
             msg: 'Error while fetching framework category instance from ekstep',
             err: {
@@ -79,6 +82,9 @@ function frameworkCategoryInstanceSearch (req, response) {
   data.queryParams = req.query
   if (!data) {
     rspObj.responseCode = responseCode.CLIENT_ERROR
+    utilsService.logErrorInfo('frameworkCategoryInstanceSearch',
+      rspObj,
+      'Error due to missing request body or query params')
     logger.error({
       msg: 'Error due to missing request body or query params',
       err: {responseCode: rspObj.responseCode},
@@ -92,12 +98,16 @@ function frameworkCategoryInstanceSearch (req, response) {
   }
 
   async.waterfall([
-
     function (CBW) {
+      utilsService.logDebugInfo('frameworkCategoryInstanceSearch',
+        rspObj,
+        'Request to search Framework Category instance')
       logger.debug({ msg: 'Request to search Framework Category instance', additionalInfo: { data } }, req)
       ekStepUtil.frameworkCategoryInstanceSearch(ekStepReqData, data.queryParams, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
           rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
+          rspObj.errMsg = 'Error while searching framework category instance from ekstep'
+          utilsService.logErrorInfo('frameworkCategoryInstanceSearch', rspObj, err)
           logger.error({
             msg: 'Error while searching framework category instance from ekstep',
             err: {
@@ -128,6 +138,9 @@ function frameworkCategoryInstanceCreate (req, response) {
   data.queryParams = req.query
   if (!data) {
     rspObj.responseCode = responseCode.CLIENT_ERROR
+    utilsService.logErrorInfo('frameworkCategoryInstanceCreate',
+      rspObj,
+      'Error due to missing request body or query params')
     logger.error({
       msg: 'Error due to missing request body or query params',
       err: {responseCode: rspObj.responseCode},
@@ -141,12 +154,17 @@ function frameworkCategoryInstanceCreate (req, response) {
   }
 
   async.waterfall([
-
     function (CBW) {
+      utilsService.logDebugInfo('frameworkCategoryInstanceCreate',
+        rspObj,
+        'Request to create Framework Category instance')
       logger.debug({ msg: 'Request to create Framework Category instance', additionalInfo: { data } }, req)
+
       ekStepUtil.frameworkCategoryInstanceCreate(ekStepReqData, data.queryParams, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
           rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
+          rspObj.errMsg = 'Error while creating framework category instance from ekstep'
+          utilsService.logErrorInfo('frameworkCategoryInstanceCreate', rspObj, err)
           logger.error({
             msg: 'Error while creating framework category instance from ekstep',
             err: {
@@ -181,6 +199,9 @@ function frameworkCategoryInstanceUpdate (req, response) {
   }
   if (!data) {
     rspObj.responseCode = responseCode.CLIENT_ERROR
+    utilsService.logErrorInfo('frameworkCategoryInstanceUpdate',
+      rspObj,
+      'Error due to missing request body or query params or categoryId')
     logger.error({
       msg: 'Error due to missing request body or query params or categoryId',
       err: {responseCode: rspObj.responseCode},
@@ -194,13 +215,17 @@ function frameworkCategoryInstanceUpdate (req, response) {
   }
 
   async.waterfall([
-
     function (CBW) {
+      utilsService.logDebugInfo('frameworkCategoryInstanceUpdate',
+        rspObj,
+        'Request to update Framework Category instance')
       logger.debug({ msg: 'Request to update Framework Category instance', additionalInfo: { data } }, req)
       ekStepUtil.frameworkCategoryInstanceUpdate(ekStepReqData, data.queryParams, data.category, req.headers,
         function (err, res) {
           if (err || res.responseCode !== responseCode.SUCCESS) {
             rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
+            rspObj.errMsg = 'Error while updating framework category instance from ekstep'
+            utilsService.logErrorInfo('frameworkCategoryInstanceUpdate', rspObj, err)
             logger.error({
               msg: 'Error while updating framework category instance from ekstep',
               err: {

@@ -24,6 +24,7 @@ const SERVICE_PREFIX = 'COL'
 function updateCollaborators (req, response) {
   var data = req.body
   data.contentId = req.params.contentId
+  var objectInfo = {'id': lodash.get(data, 'contentId'), 'type': 'Content'}
 
   var rspObj = req.rspObj
   // Adding objectData in telemetry
@@ -36,6 +37,10 @@ function updateCollaborators (req, response) {
     rspObj.errCode = `${SERVICE_PREFIX}_${contentMessage.COLLABORATORS.MISSING_ERR_CODE}`
     rspObj.errMsg = contentMessage.COLLABORATORS.MISSING_MESSAGE
     rspObj.responseCode = responseCode.CLIENT_ERROR
+    utilsService.logErrorInfo('content',
+      rspObj,
+      'Error due to required request body || content is missing',
+      objectInfo)
     logger.error({
       msg: 'Error due to required request body || content is missing',
       err: {
@@ -56,6 +61,7 @@ function updateCollaborators (req, response) {
         fields: 'versionKey,collaborators,contentType,name,mimeType,framework,status'
       }
 
+      utilsService.logDebugInfo('content', rspObj, 'Request to update collaborators', objectInfo)
       logger.debug({
         msg: 'Request to update collaborators',
         additionalInfo: {
@@ -68,6 +74,10 @@ function updateCollaborators (req, response) {
           rspObj.errCode = res && res.params ? res.params.err : `${SERVICE_PREFIX}_${contentMessage.COLLABORATORS.FAILED_ERR_CODE}`
           rspObj.errMsg = res && res.params ? res.params.errmsg : contentMessage.COLLABORATORS.FAILED_MESSAGE
           rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
+          utilsService.logErrorInfo('content',
+            rspObj,
+            'Getting error from content provider while fetching content',
+            objectInfo)
           logger.error({
             msg: 'Getting error from content provider while fetching content',
             err: {
@@ -88,7 +98,10 @@ function updateCollaborators (req, response) {
             rspObj.errMsg = contentMessage.COLLABORATORS.FAILED_MESSAGE
             rspObj.responseCode = res.result.content.status === 'Retired'
               ? responseCode.RESOURCE_NOT_FOUND : contentMessage.COLLABORATORS.FORBIDDEN
-
+            utilsService.logErrorInfo('content',
+              rspObj,
+              'Cannot update collaborators because content is not in Draft state',
+              objectInfo)
             logger.error({
               msg: 'Cannot update collaborators because content is not in Draft state',
               err: {
@@ -121,6 +134,11 @@ function updateCollaborators (req, response) {
       var ekStepReqData = {
         request: data.request
       }
+      utilsService.logDebugInfo('content',
+        rspObj,
+        'Request to content provider to update the content',
+        objectInfo)
+
       logger.debug({
         msg: 'Request to content provider to update the content',
         additionalInfo: {
@@ -132,6 +150,10 @@ function updateCollaborators (req, response) {
           rspObj.errCode = res && res.params ? res.params.err : `${SERVICE_PREFIX}_${contentMessage.COLLABORATORS.FAILED_ERR_CODE}`
           rspObj.errMsg = res && res.params ? res.params.errmsg : contentMessage.COLLABORATORS.FAILED_MESSAGE
           rspObj.responseCode = res && res.responseCode ? res.responseCode : responseCode.SERVER_ERROR
+          utilsService.logErrorInfo('content',
+            rspObj,
+            'Getting error from content provider while updating content',
+            objectInfo)
           logger.error({
             msg: 'Getting error from content provider while updating content',
             err: {
@@ -155,6 +177,11 @@ function updateCollaborators (req, response) {
     function (res) {
       rspObj.result.content_id = res.result.node_id
       rspObj.result.versionKey = res.result.versionKey
+      utilsService.logDebugInfo('content',
+        rspObj,
+        'updateCollaborators API result',
+        objectInfo)
+
       logger.debug({
         msg: 'updateCollaborators API result',
         additionalInfo: {
@@ -189,6 +216,8 @@ function compareCollaborators (req, contentInfo, oldCollaboratorsArray, newColla
  * @param {string} emailType
  */
 function notifyCollaborators (req, cData, collaboratorsArray, emailType) {
+  let rspObj = req.rspObj
+
   if (!lodash.isEmpty(collaboratorsArray)) {
     async.waterfall([
       function (CBW) {
@@ -202,10 +231,15 @@ function notifyCollaborators (req, cData, collaboratorsArray, emailType) {
         var lsEmailData = {
           request: getEmailData(subject, body, collaboratorsArray, eData.TEMPLATE)
         }
-
+        utilsService.logDebugInfo('content',
+          rspObj,
+          'request to send mail')
         logger.debug({ msg: 'request to send mail', additionalInfo: { body: lsEmailData } }, req)
         contentProvider.sendEmail(lsEmailData, req.headers, function (err, res) {
           if (err || res.responseCode !== responseCode.SUCCESS) {
+            utilsService.logErrorInfo('content',
+              rspObj,
+              'Sending email failed')
             logger.error({ msg: 'Sending email failed', additionalInfo: { emailData: lsEmailData }, err }, req)
             CBW(new Error('Sending email failed'), null)
           } else {
@@ -215,6 +249,9 @@ function notifyCollaborators (req, cData, collaboratorsArray, emailType) {
       },
 
       function (res) {
+        utilsService.logDebugInfo('content',
+          rspObj,
+          'Email sent successfully')
         logger.debug({ msg: 'Email sent successfully' }, req)
         return (null, true)
       }

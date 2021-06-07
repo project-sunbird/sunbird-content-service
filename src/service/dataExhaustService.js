@@ -5,14 +5,11 @@
  */
 
 var async = require('async')
-var path = require('path')
 var respUtil = require('response_util')
 var contentProvider = require('sb_content_provider_util')
 var logger = require('sb_logger_util_v2')
 var messageUtils = require('./messageUtil')
 var utilsService = require('../service/utilsService')
-
-var filename = path.basename(__filename)
 var dataSetMessages = messageUtils.DATASET
 var responseCode = messageUtils.RESPONSE_CODE
 
@@ -21,16 +18,21 @@ var responseCode = messageUtils.RESPONSE_CODE
  * @param {object} req
  * @param {object} response
  */
-function submitDataSetRequest(req, response) {
+function submitDataSetRequest (req, response) {
   var data = req.body
   var rspObj = req.rspObj
 
   async.waterfall([
 
     function (CBW) {
+      utilsService.logDebugInfo('submitDataSet',
+        rspObj,
+        'Request to content provider to submit data exhaust')
       logger.debug({ msg: 'Request to content provider to submit data exhaust' }, req)
       contentProvider.submitDataSetRequest(data, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
+          rspObj.errMsg = 'Getting error from content provider while submitting dataset request'
+          utilsService.logErrorInfo('submitDataSet', rspObj, err)
           logger.error({ msg: 'Getting error from content provider while submitting dataset request', additionalInfo: { data }, err }, req)
           rspObj.result = res && res.result ? res.result : {}
           rspObj = utilsService.getErrorResponse(rspObj, res, dataSetMessages.SUBMIT)
@@ -42,6 +44,9 @@ function submitDataSetRequest(req, response) {
     },
     function (res) {
       rspObj.result = res.result
+      utilsService.logDebugInfo('submitDataSet',
+        rspObj,
+        'submitDataSetRequest API result')
       logger.debug({ msg: 'submitDataSetRequest API result', additionalInfo: { result: rspObj.result } }, req)
       return response.status(200).send(respUtil.successResponse(rspObj))
     }
@@ -53,7 +58,7 @@ function submitDataSetRequest(req, response) {
  * @param {object} req
  * @param {object} response
  */
-function getListOfDataSetRequest(req, response) {
+function getListOfDataSetRequest (req, response) {
   var query = req.query
   var rspObj = req.rspObj
   var clientKey = req.params.clientKey
@@ -61,6 +66,9 @@ function getListOfDataSetRequest(req, response) {
   async.waterfall([
 
     function (CBW) {
+      utilsService.logDebugInfo('getListOfDataSet',
+        rspObj,
+        'Request to content provider to get list of dataset')
       logger.debug({
         msg: 'Request to content provider to get list of dataset',
         additionalInfo: {
@@ -71,6 +79,8 @@ function getListOfDataSetRequest(req, response) {
 
       contentProvider.getListOfDataSetRequest(query, clientKey, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
+          rspObj.errMsg = 'Getting error from content provider while getting list of dataset'
+          utilsService.logErrorInfo('getListOfDataSet', rspObj, err)
           logger.error({ msg: 'Getting error from content provider while getting list of dataset', additionalInfo: { query }, err }, req)
           rspObj.result = res && res.result ? res.result : {}
           rspObj = utilsService.getErrorResponse(rspObj, res, dataSetMessages.LIST)
@@ -82,6 +92,9 @@ function getListOfDataSetRequest(req, response) {
     },
     function (res) {
       rspObj.result = res.result
+      utilsService.logDebugInfo('getListOfDataSet',
+        rspObj,
+        'getListOfDataSetRequest API result')
       logger.debug({ msg: 'getListOfDataSetRequest API result', additionalInfo: { result: rspObj.result } }, req)
       return response.status(200).send(respUtil.successResponse(rspObj))
     }
@@ -93,7 +106,7 @@ function getListOfDataSetRequest(req, response) {
  * @param {object} req
  * @param {object} response
  */
-function getDataSetDetailRequest(req, response) {
+function getDataSetDetailRequest (req, response) {
   var rspObj = req.rspObj
   var clientKey = req.params.clientKey
   var requestId = req.params.requestId
@@ -101,6 +114,9 @@ function getDataSetDetailRequest(req, response) {
   async.waterfall([
 
     function (CBW) {
+      utilsService.logDebugInfo('getDataSetDetail',
+        rspObj,
+        'Request to content provider to get detail of dataset')
       logger.debug({
         msg: 'Request to content provider to get detail of dataset',
         additionalInfo: {
@@ -110,6 +126,8 @@ function getDataSetDetailRequest(req, response) {
       }, req)
       contentProvider.getDataSetDetailRequest(clientKey, requestId, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
+          rspObj.errMsg = 'Getting error from content provider while getting detail of dataset'
+          utilsService.logErrorInfo('getDataSetDetail', rspObj, err)
           logger.error({ msg: 'Getting error from content provider while getting detail of dataset', err }, req)
           rspObj.result = res && res.result ? res.result : {}
           rspObj = utilsService.getErrorResponse(rspObj, res, dataSetMessages.READ)
@@ -121,6 +139,9 @@ function getDataSetDetailRequest(req, response) {
     },
     function (res) {
       rspObj.result = res.result
+      utilsService.logDebugInfo('getDataSetDetail',
+        rspObj,
+        'getDataSetDetailRequest API result')
       logger.debug({ msg: 'getDataSetDetailRequest API result', additionalInfo: { result: rspObj.result } }, req)
       return response.status(200).send(respUtil.successResponse(rspObj))
     }
@@ -132,7 +153,7 @@ function getDataSetDetailRequest(req, response) {
  * @param {object} req
  * @param {object} response
  */
-function getChannelDataSetRequest(req, response) {
+function getChannelDataSetRequest (req, response) {
   var query = req.query
   var rspObj = req.rspObj
   var dataSetId = req.params.dataSetId
@@ -141,6 +162,9 @@ function getChannelDataSetRequest(req, response) {
   async.waterfall([
 
     function (CBW) {
+      utilsService.logDebugInfo('getChannelDataSet',
+        rspObj,
+        'Request to content provider to get channel dataset')
       logger.debug({
         msg: 'Request to content provider to get channel dataset',
         additionalInfo: {
@@ -151,6 +175,8 @@ function getChannelDataSetRequest(req, response) {
       }, req)
       contentProvider.getChannelDataSetRequest(query, dataSetId, channelId, req.headers, function (err, res) {
         if (err || res.responseCode !== responseCode.SUCCESS) {
+          rspObj.errMsg = 'Getting error from content provider to get channel dataset'
+          utilsService.logErrorInfo('getChannelDataSet', rspObj, err)
           logger.error({ msg: 'Getting error from content provider to get channel dataset', additionalInfo: { query }, err }, req)
           rspObj.result = res && res.result ? res.result : {}
           rspObj = utilsService.getErrorResponse(rspObj, res, dataSetMessages.CHANNEL)
@@ -162,6 +188,9 @@ function getChannelDataSetRequest(req, response) {
     },
     function (res) {
       rspObj.result = res.result
+      utilsService.logDebugInfo('getChannelDataSet',
+        rspObj,
+        'getChannelDataSetRequest API result')
       logger.debug({ msg: 'getChannelDataSetRequest API result', additionalInfo: { result: rspObj.result } }, req)
       return response.status(200).send(respUtil.successResponse(rspObj))
     }

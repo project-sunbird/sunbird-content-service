@@ -10,6 +10,10 @@ const jwt = require('jsonwebtoken')
 var responseCode = messageUtils.RESPONSE_CODE
 var _ = require('lodash')
 var configUtil = require('sb-config-util')
+var PDATA = require('../config/telemetryEventConfig.json').pdata
+const uuidV1 = require('uuid/v1')
+var logger = require('sb_logger_util_v2')
+const LOG_PREFIX = 'KMW'
 
 /**
  * this function helps to create apiId for error and success response
@@ -209,6 +213,79 @@ function getErrorResponse (rspObj, serverRsp, msgObject) {
   return rspObj
 }
 
+/**
+ * This function helps to log debug info
+ * @param {String} api
+ * @param {object} rspObj
+ * @param {String} logMessage
+ * @param {object} objectInfo
+ */
+function logDebugInfo (api, rspObj, logMessage, objectInfo) {
+  var data = {
+    'eid': 'LOG',
+    'ets': Date.now(),
+    'ver': '3.0',
+    'mid': `LOG:${uuidV1()}`,
+    'context': getContextInfo(),
+    'action': {
+      'id': api,
+      'type': 'API'
+    },
+    'edata': {
+      'type': 'system',
+      'level': 'DEBUG',
+      'message': logMessage
+    }
+  }
+
+  if (!_.isEmpty(objectInfo)) {
+    data.object = objectInfo
+  }
+  if (_.get(rspObj, 'telemetryData.params')) {
+    data.edata.params = rspObj.telemetryData.params
+  }
+  if (rspObj.requestid || rspObj.msgid) {
+    data.edata.requestid = rspObj.requestid || rspObj.msgid
+  }
+  logger.debug(data)
+}
+
+function logErrorInfo (api, rspObj, error, objectInfo) {
+  var data = {
+    'eid': 'ERROR',
+    'ets': Date.now(),
+    'ver': '3.0',
+    'mid': `ERROR:${uuidV1()}`,
+    'context': getContextInfo(),
+    'action': {
+      'id': api,
+      'type': 'API'
+    },
+    'edata': {
+      'err': `${LOG_PREFIX}_${rspObj.errCode}`,
+      'errtype': rspObj.errMsg
+    }
+  }
+  if (!_.isEmpty(objectInfo)) {
+    data.object = objectInfo
+  }
+  if (!_.isEmpty(error)) {
+    data.edata.stacktrace = error
+  }
+  if (rspObj.requestid || rspObj.msgid) {
+    data.edata.requestid = rspObj.requestid || rspObj.msgid
+  }
+  logger.error(data)
+}
+
+function getContextInfo () {
+  return {
+    'channel': 'sunbird-content-service',
+    'env': 'knowledge-mw-service',
+    'pdata': PDATA
+  }
+}
+
 module.exports.getLoggerData = getLoggerData
 module.exports.getPerfLoggerData = getPerfLoggerData
 module.exports.getAppIDForRESP = getAppIDForRESP
@@ -219,3 +296,5 @@ module.exports.getObjectData = getObjectData
 module.exports.updateContextData = updateContextData
 module.exports.getHttpStatus = getHttpStatus
 module.exports.getErrorResponse = getErrorResponse
+module.exports.logDebugInfo = logDebugInfo
+module.exports.logErrorInfo = logErrorInfo
